@@ -43,14 +43,14 @@ defmodule SGP30 do
           state
       end
 
-    I2C.write(i2c, address, <<0x20, 0x03>>)
+    _ = I2C.write(i2c, address, <<0x20, 0x03>>)
     Process.send_after(self(), :measure, @polling_interval_ms)
 
     {:noreply, state}
   end
 
   def handle_info(:measure, %{address: address, i2c: i2c} = state) do
-    I2C.write(i2c, address, <<0x20, 0x08>>)
+    _ = I2C.write(i2c, address, <<0x20, 0x08>>)
     :timer.sleep(10)
 
     state =
@@ -63,7 +63,7 @@ defmodule SGP30 do
           state
       end
 
-    I2C.write(i2c, address, <<0x20, 0x50>>)
+    _ = I2C.write(i2c, address, <<0x20, 0x50>>)
     :timer.sleep(20)
 
     state =
