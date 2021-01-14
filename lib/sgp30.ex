@@ -7,7 +7,13 @@ defmodule SGP30 do
 
   @polling_interval_ms 900
 
-  defstruct address: 0x58, serial: nil, tvoc: 0, eco2: 0, i2c: nil, h2_raw: nil, ethanol_raw: nil
+  defstruct address: 0x58,
+            serial: nil,
+            tvoc_ppb: 0,
+            co2_eq_ppm: 0,
+            i2c: nil,
+            h2_raw: 0,
+            ethanol_raw: 0
 
   @spec start_link(bus_name: String.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts \\ []) do
@@ -49,8 +55,8 @@ defmodule SGP30 do
 
     state =
       case I2C.read(i2c, address, 6) do
-        {:ok, <<eco2::size(16), _crc, tvoc::size(16), _crc2>>} ->
-          %{state | eco2: eco2, tvoc: tvoc}
+        {:ok, <<co2_eq_ppm::size(16), _crc, tvoc_ppb::size(16), _crc2>>} ->
+          %{state | co2_eq_ppm: co2_eq_ppm, tvoc_ppb: tvoc_ppb}
 
         err ->
           log_it("measure error: #{inspect(err)}", :error)

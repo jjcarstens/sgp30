@@ -27,12 +27,12 @@ iex()> {:ok, sgp} = SGP30.start_link()
 iex()> SGP30.state
 %SGP30{
   address: 88,
-  eco2: 421,
+  co2_eq_ppm: 421,
   ethanol_raw: 17934,
   h2_raw: 13113,
   i2c: #Reference<0.7390235.92137012.02842>,
   serial: <<0, 0, 0, 253, 127, 15>>,
-  tvoc: 17
+  tvoc_ppb: 17
 }
 ```
 
