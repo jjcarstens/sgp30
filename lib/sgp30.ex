@@ -42,7 +42,6 @@ defmodule Sgp30 do
   end
 
   def handle_info(:measure, %{address: address, i2c: i2c} = state) do
-    log_it("Measuring...")
     I2C.write(i2c, address, <<0x20, 0x08>>)
     :timer.sleep(10)
 
@@ -73,7 +72,7 @@ defmodule Sgp30 do
     {:noreply, state}
   end
 
-  defp log_it(str, level \\ :debug) do
+  defp log_it(str, level) do
     Logger.bare_log(level, ["[#{__MODULE__}] - ", str])
   end
 end
