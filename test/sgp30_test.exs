@@ -1,4 +1,4 @@
-defmodule Sgp30Test do
+defmodule SGP30Test do
   use ExUnit.Case
-  doctest Sgp30
+  doctest SGP30
 end

@@ -1,4 +1,4 @@
-defmodule Sgp30 do
+defmodule SGP30 do
   use GenServer
 
   require Logger

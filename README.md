@@ -18,14 +18,14 @@ end
 
 According to the [datasheet](https://www.mouser.com/datasheet/2/682/Sensirion_Gas_Sensors_SGP30_Datasheet_EN-1148053.pdf), the sensor must
 be initialized and the caller must start a measurement every second.
-`Sgp30` handles this for you once initialized it will take a measurement
-every second and you would simply call `Sgp30.state` to get the
+`SGP30` handles this for you once initialized it will take a measurement
+every second and you would simply call `SGP30.state` to get the
 most current results.
 
 ```elixir
-iex()> {:ok, sgp} = Sgp30.start_link()
-iex()> Sgp30.state
-%Sgp30{
+iex()> {:ok, sgp} = SGP30.start_link()
+iex()> SGP30.state
+%SGP30{
   address: 88,
   eco2: 421,
   ethanol_raw: 17934,

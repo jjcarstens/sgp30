@@ -1,4 +1,4 @@
-defmodule Sgp30.MixProject do
+defmodule SGP30.MixProject do
   use Mix.Project
 
   @version "0.1.0"
