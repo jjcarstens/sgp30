@@ -74,6 +74,6 @@ defmodule Sgp30 do
   end
 
   defp log_it(str, level \\ :debug) do
-    apply(Logger, level, ["[#{__MODULE__}] - " <> str])
+    Logger.bare_log(level, ["[#{__MODULE__}] - ", str])
   end
 end
