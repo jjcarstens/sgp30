@@ -1,4 +1,4 @@
-# sgp30
+# SGP30
 Interface with SGP30 gas sensor with elixir.
 
 For more info on the sensor, see the [datasheet](https://www.mouser.com/datasheet/2/682/Sensirion_Gas_Sensors_SGP30_Datasheet_EN-1148053.pdf).
@@ -53,16 +53,13 @@ Expected events reported ¬
 | `[:sgp30, :measure]` | `%SGP30{}` | `%{system_time: System.monotonic_time()}` |
 | `[:sgp30, :measure, :start]` | `%{system_time: System.monotonic_time()}` | `%{}` |
 | `[:sgp30, :measure, :stop]` | `%{duration: integer()}` | `%{optional(:error) => any()}` |
-| `[:sgp30, :measure, :exception]` | `%{duration: integer()}` | `%{kind: :throw | :error | :exit, reason: term(), stacktrace: list()}` |
+| `[:sgp30, :measure, :exception]` | `%{duration: integer()}` | `%{kind: :throw\:error\:exit, reason: term(), stacktrace: list()}` |
 | `[:sgp30, :measure_raw]` | `%SGP30{}` | `%{system_time: System.monotonic_time()}` |
 | `[:sgp30, :measure_raw, :start]` | `%{system_time: System.monotonic_time()}` | `%{}` |
 | `[:sgp30, :measure_raw, :stop]` | `%{duration: integer()}` | `%{optional(:error) => any()}` |
-| `[:sgp30, :measure_raw, :exception]` | `%{duration: integer()}` | `%{kind: :throw | :error | :exit, reason: term(), stacktrace: list()}` |
+| `[:sgp30, :measure_raw, :exception]` | `%{duration: integer()}` | `%{kind: :throw\:error\:exit, reason: term(), stacktrace: list()}` |
 
-**Note**: The `:stop` event will only include the `:error` key in the meta data
+
+**Note:** The `:stop` event will only include the `:error` key in the meta data
 on I2C read errors that are reported, but not neccesarily thrown as an exception.
 Also, a `:stop` event after a successful read will not include the `:error` key.
-
-## TODO
-
-- [ ] Support setting humidity to adjust measurements.

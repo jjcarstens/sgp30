@@ -1,4 +1,8 @@
 defmodule SGP30 do
+  @moduledoc File.read!("README.md")
+             |> String.split("# Usage")
+             |> Enum.fetch!(1)
+
   use GenServer
 
   require Logger
