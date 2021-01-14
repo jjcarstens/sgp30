@@ -16,7 +16,7 @@ end
 
 # Usage
 
-According to the [datasheet](https://www.mouser.com/datasheet/2/682/Sensirion_Gas_Sensors_SGP30_Datasheet_EN-1148053.pdf), the sensor must 
+According to the [datasheet](https://www.mouser.com/datasheet/2/682/Sensirion_Gas_Sensors_SGP30_Datasheet_EN-1148053.pdf), the sensor must
 be initialized and the caller must start a measurement every second.
 `Sgp30` handles this for you once initialized it will take a measurement
 every second and you would simply call `Sgp30.state` to get the
