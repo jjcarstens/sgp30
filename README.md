@@ -28,7 +28,7 @@ iex()> Sgp30.state
 %Sgp30{
   address: 88,
   eco2: 421,
-  ethenol_raw: 17934,
+  ethanol_raw: 17934,
   h2_raw: 13113,
   i2c: #Reference<0.7390235.92137012.02842>,
   serial: <<0, 0, 0, 253, 127, 15>>,

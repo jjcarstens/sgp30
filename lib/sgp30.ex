@@ -5,7 +5,7 @@ defmodule Sgp30 do
 
   alias Circuits.I2C
 
-  defstruct address: 0x58, serial: nil, tvoc: 0, eco2: 0, i2c: nil, h2_raw: nil, ethenol_raw: nil
+  defstruct address: 0x58, serial: nil, tvoc: 0, eco2: 0, i2c: nil, h2_raw: nil, ethanol_raw: nil
 
   @spec start_link([bus_name: String.t()]) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts \\ []) do
@@ -46,25 +46,27 @@ defmodule Sgp30 do
     :timer.sleep(10)
 
     state =
-    case I2C.read(i2c, address, 6) do
-      {:ok, <<eco2::size(16), _crc, tvoc::size(16), _crc2>>} ->
-        %{state | eco2: eco2, tvoc: tvoc}
-      err ->
-        log_it("measure error: #{inspect(err)}", :error)
-        state
-    end
+      case I2C.read(i2c, address, 6) do
+        {:ok, <<eco2::size(16), _crc, tvoc::size(16), _crc2>>} ->
+          %{state | eco2: eco2, tvoc: tvoc}
+
+        err ->
+          log_it("measure error: #{inspect(err)}", :error)
+          state
+      end
 
     I2C.write(i2c, address, <<0x20, 0x50>>)
     :timer.sleep(20)
 
     state =
-    case I2C.read(i2c, address, 6) do
-      {:ok, <<h2_raw::size(16), _crc, ethenol_raw::size(16), _crc2>>} ->
-        %{state | h2_raw: h2_raw, ethenol_raw: ethenol_raw}
-      err ->
-        log_it("raw measure error: #{inspect(err)}", :error)
-        state
-    end
+      case I2C.read(i2c, address, 6) do
+        {:ok, <<h2_raw::size(16), _crc, ethanol_raw::size(16), _crc2>>} ->
+          %{state | h2_raw: h2_raw, ethanol_raw: ethanol_raw}
+
+        err ->
+          log_it("raw measure error: #{inspect(err)}", :error)
+          state
+      end
 
     Process.send_after(self(), :measure, 1_000)
     {:noreply, state}
