@@ -7,7 +7,7 @@ defmodule Sgp30 do
 
   defstruct address: 0x58, serial: nil, tvoc: 0, eco2: 0, i2c: nil, h2_raw: nil, ethanol_raw: nil
 
-  @spec start_link([bus_name: String.t()]) :: :ignore | {:error, any} | {:ok, pid}
+  @spec start_link(bus_name: String.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
@@ -29,6 +29,7 @@ defmodule Sgp30 do
       case I2C.write_read(i2c, address, <<0x3682::size(16)>>, 9) do
         {:ok, <<word1::size(16), _crc1, word2::size(16), _crc2, word3::size(16), _crc3>>} ->
           %{state | serial: <<word1::size(16), word2::size(16), word3::size(16)>>}
+
         err ->
           log_it("serial read error: #{inspect(err)}", :error)
           state
