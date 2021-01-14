@@ -31,7 +31,7 @@ iex()> SGP30.state
   ethanol_raw: 17934,
   h2_raw: 13113,
   i2c: #Reference<0.7390235.92137012.02842>,
-  serial: <<0, 0, 0, 253, 127, 15>>,
+  serial: 16613135,
   tvoc_ppb: 17
 }
 ```

@@ -8,7 +8,7 @@ defmodule SGP30 do
   @polling_interval_ms 900
 
   defstruct address: 0x58,
-            serial: nil,
+            serial: 0,
             tvoc_ppb: 0,
             co2_eq_ppm: 0,
             i2c: nil,
@@ -36,7 +36,7 @@ defmodule SGP30 do
     state =
       case I2C.write_read(i2c, address, <<0x3682::size(16)>>, 9) do
         {:ok, <<word1::size(16), _crc1, word2::size(16), _crc2, word3::size(16), _crc3>>} ->
-          %{state | serial: <<word1::size(16), word2::size(16), word3::size(16)>>}
+          %{state | serial: serial_as_integer(word1, word2, word3)}
 
         err ->
           log_it("serial read error: #{inspect(err)}", :error)
@@ -82,5 +82,10 @@ defmodule SGP30 do
 
   defp log_it(str, level) do
     Logger.bare_log(level, ["[#{__MODULE__}] - ", str])
+  end
+
+  defp serial_as_integer(word1, word2, word3) do
+    <<serial::48>> = <<word1::16, word2::16, word3::16>>
+    serial
   end
 end
