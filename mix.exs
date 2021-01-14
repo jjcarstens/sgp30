@@ -31,6 +31,7 @@ defmodule SGP30.MixProject do
   defp deps do
     [
       {:circuits_i2c, "~> 0.3"},
+      {:telemetry, "~> 0.4"},
       {:ex_doc, "~> 0.21", only: :docs}
     ]
   end

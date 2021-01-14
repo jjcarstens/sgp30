@@ -36,7 +36,33 @@ iex()> SGP30.state
 }
 ```
 
+## Monitoring
+
+Each measurement uses `:telemetry.span/3` for duration and error tracking and
+also emits an event on successful measurement with the current system time in
+the metadata. This allows you to use the `:telemetry` tooling to track reported
+values over time and monitor the results of the sensor.
+
+`SGP30` also measures the raw values at the same time. This are typically not
+needed, but are useful in calibration and tracking potential hardware failures.
+
+Expected events reported ¬
+
+| name | measurement | meta |
+| --- | --- | --- |
+| `[:sgp30, :measure]` | `%SGP30{}` | `%{system_time: System.monotonic_time()}` |
+| `[:sgp30, :measure, :start]` | `%{system_time: System.monotonic_time()}` | `%{}` |
+| `[:sgp30, :measure, :stop]` | `%{duration: integer()}` | `%{optional(:error) => any()}` |
+| `[:sgp30, :measure, :exception]` | `%{duration: integer()}` | `%{kind: :throw | :error | :exit, reason: term(), stacktrace: list()}` |
+| `[:sgp30, :measure_raw]` | `%SGP30{}` | `%{system_time: System.monotonic_time()}` |
+| `[:sgp30, :measure_raw, :start]` | `%{system_time: System.monotonic_time()}` | `%{}` |
+| `[:sgp30, :measure_raw, :stop]` | `%{duration: integer()}` | `%{optional(:error) => any()}` |
+| `[:sgp30, :measure_raw, :exception]` | `%{duration: integer()}` | `%{kind: :throw | :error | :exit, reason: term(), stacktrace: list()}` |
+
+**Note**: The `:stop` event will only include the `:error` key in the meta data
+on I2C read errors that are reported, but not neccesarily thrown as an exception.
+Also, a `:stop` event after a successful read will not include the `:error` key.
+
 ## TODO
-- [ ] Support registering a listening process to receive the
-measurement every second
+
 - [ ] Support setting humidity to adjust measurements.

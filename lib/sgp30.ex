@@ -64,35 +64,49 @@ defmodule SGP30 do
   end
 
   @impl GenServer
-  def handle_info(:measure, %{address: address, i2c: i2c} = state) do
-    _ = I2C.write(i2c, address, <<0x20, 0x08>>)
-    :timer.sleep(10)
-
+  def handle_info(:measure, state) do
     state =
-      case I2C.read(i2c, address, 6) do
-        {:ok, <<co2_eq_ppm::size(16), _crc, tvoc_ppb::size(16), _crc2>>} ->
-          %{state | co2_eq_ppm: co2_eq_ppm, tvoc_ppb: tvoc_ppb}
-
-        err ->
-          log_it("measure error: #{inspect(err)}", :error)
-          state
-      end
-
-    _ = I2C.write(i2c, address, <<0x20, 0x50>>)
-    :timer.sleep(20)
-
-    state =
-      case I2C.read(i2c, address, 6) do
-        {:ok, <<h2_raw::size(16), _crc, ethanol_raw::size(16), _crc2>>} ->
-          %{state | h2_raw: h2_raw, ethanol_raw: ethanol_raw}
-
-        err ->
-          log_it("raw measure error: #{inspect(err)}", :error)
-          state
-      end
+      state
+      |> track_event(:measure)
+      |> track_event(:measure_raw)
 
     Process.send_after(self(), :measure, @polling_interval_ms)
     {:noreply, state}
+  end
+
+  defp execute_event(event, state) do
+    case event do
+      :measure -> measure(state)
+      :measure_raw -> measure_raw(state)
+    end
+  end
+
+  defp measure(state) do
+    _ = I2C.write(state.i2c, state.address, <<0x20, 0x08>>)
+    :timer.sleep(10)
+
+    case I2C.read(state.i2c, state.address, 6) do
+      {:ok, <<co2_eq_ppm::16, _crc, tvoc_ppb::16, _crc2>>} ->
+        %{state | co2_eq_ppm: co2_eq_ppm, tvoc_ppb: tvoc_ppb}
+
+      {:error, err} ->
+        log_it("measure error: #{inspect(err)}", :error)
+        {:error, err, state}
+    end
+  end
+
+  defp measure_raw(state) do
+    _ = I2C.write(state.i2c, state.address, <<0x20, 0x50>>)
+    :timer.sleep(20)
+
+    case I2C.read(state.i2c, state.address, 6) do
+      {:ok, <<h2_raw::16, _crc, ethanol_raw::16, _crc2>>} ->
+        %{state | h2_raw: h2_raw, ethanol_raw: ethanol_raw}
+
+      {:error, err} ->
+        log_it("raw measure error: #{inspect(err)}", :error)
+        {:error, err, state}
+    end
   end
 
   defp log_it(str, level) do
@@ -102,5 +116,20 @@ defmodule SGP30 do
   defp serial_as_integer(word1, word2, word3) do
     <<serial::48>> = <<word1::16, word2::16, word3::16>>
     serial
+  end
+
+  defp track_event(state, event) do
+    name = [:sgp30, event]
+
+    :telemetry.span(name, %{}, fn ->
+      case execute_event(event, state) do
+        {:error, err, state} ->
+          {state, %{error: err}}
+
+        updated ->
+          :telemetry.execute(name, updated, %{system_time: System.monotonic_time()})
+          {updated, %{}}
+      end
+    end)
   end
 end
