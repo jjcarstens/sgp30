@@ -5,6 +5,8 @@ defmodule Sgp30 do
 
   alias Circuits.I2C
 
+  @polling_interval_ms 900
+
   defstruct address: 0x58, serial: nil, tvoc: 0, eco2: 0, i2c: nil, h2_raw: nil, ethanol_raw: nil
 
   @spec start_link(bus_name: String.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -36,7 +38,7 @@ defmodule Sgp30 do
       end
 
     I2C.write(i2c, address, <<0x20, 0x03>>)
-    Process.send_after(self(), :measure, 1_000)
+    Process.send_after(self(), :measure, @polling_interval_ms)
 
     {:noreply, state}
   end
@@ -69,7 +71,7 @@ defmodule Sgp30 do
           state
       end
 
-    Process.send_after(self(), :measure, 1_000)
+    Process.send_after(self(), :measure, @polling_interval_ms)
     {:noreply, state}
   end
 
