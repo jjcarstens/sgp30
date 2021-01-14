@@ -15,23 +15,37 @@ defmodule SGP30 do
             h2_raw: 0,
             ethanol_raw: 0
 
-  @spec start_link(bus_name: String.t()) :: :ignore | {:error, any} | {:ok, pid}
+  @type t() :: %__MODULE__{
+          address: I2C.address(),
+          serial: non_neg_integer(),
+          tvoc_ppb: non_neg_integer(),
+          co2_eq_ppm: non_neg_integer(),
+          i2c: I2C.bus() | nil,
+          h2_raw: non_neg_integer(),
+          ethanol_raw: non_neg_integer()
+        }
+
+  @spec start_link(bus_name: String.t()) :: GenServer.on_start()
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
+  @impl GenServer
   def init(opts) do
     bus_name = opts[:bus_name] || "i2c-1"
     {:ok, i2c} = I2C.open(bus_name)
     {:ok, %__MODULE__{i2c: i2c}, {:continue, :serial}}
   end
 
+  @spec state(GenServer.server()) :: t()
   def state(name \\ __MODULE__) do
     GenServer.call(name, :get_state)
   end
 
+  @impl GenServer
   def handle_call(:get_state, _from, state), do: {:reply, state, state}
 
+  @impl GenServer
   def handle_continue(:serial, %{address: address, i2c: i2c} = state) do
     state =
       case I2C.write_read(i2c, address, <<0x3682::size(16)>>, 9) do
@@ -49,6 +63,7 @@ defmodule SGP30 do
     {:noreply, state}
   end
 
+  @impl GenServer
   def handle_info(:measure, %{address: address, i2c: i2c} = state) do
     _ = I2C.write(i2c, address, <<0x20, 0x08>>)
     :timer.sleep(10)
