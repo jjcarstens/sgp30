@@ -8,6 +8,7 @@ defmodule SGP30 do
   require Logger
 
   alias Circuits.I2C
+  alias SGP30.CRC
 
   @polling_interval_ms 900
 
@@ -52,9 +53,14 @@ defmodule SGP30 do
   @impl GenServer
   def handle_continue(:serial, %{address: address, i2c: i2c} = state) do
     state =
-      case I2C.write_read(i2c, address, <<0x3682::size(16)>>, 9) do
-        {:ok, <<word1::size(16), _crc1, word2::size(16), _crc2, word3::size(16), _crc3>>} ->
-          %{state | serial: serial_as_integer(word1, word2, word3)}
+      with {:ok, <<word1::size(16), crc1, word2::size(16), crc2, word3::size(16), crc3>>} <-
+             I2C.write_read(i2c, address, <<0x3682::size(16)>>, 9),
+           true <- CRC.check([{word1, crc1}, {word2, crc2}, {word3, crc3}]) do
+        %{state | serial: serial_as_integer(word1, word2, word3)}
+      else
+        false ->
+          log_it("CRC check failed!", :error)
+          state
 
         err ->
           log_it("serial read error: #{inspect(err)}", :error)
@@ -89,13 +95,18 @@ defmodule SGP30 do
     _ = I2C.write(state.i2c, state.address, <<0x20, 0x08>>)
     :timer.sleep(10)
 
-    case I2C.read(state.i2c, state.address, 6) do
-      {:ok, <<co2_eq_ppm::16, _crc, tvoc_ppb::16, _crc2>>} ->
-        %{state | co2_eq_ppm: co2_eq_ppm, tvoc_ppb: tvoc_ppb}
-
+    with {:ok, <<co2_eq_ppm::16, co2_crc::8, tvoc_ppb::16, tvoc_crc::8>>} <-
+           I2C.read(state.i2c, state.address, 6),
+         true <- CRC.check([{co2_eq_ppm, co2_crc}, {tvoc_ppb, tvoc_crc}]) do
+      %{state | co2_eq_ppm: co2_eq_ppm, tvoc_ppb: tvoc_ppb}
+    else
       {:error, err} ->
         log_it("measure error: #{inspect(err)}", :error)
         {:error, err, state}
+
+      false ->
+        log_it("CRC check failed", :error)
+        {:error, "CRC check failed", :error}
     end
   end
 
@@ -103,13 +114,18 @@ defmodule SGP30 do
     _ = I2C.write(state.i2c, state.address, <<0x20, 0x50>>)
     :timer.sleep(20)
 
-    case I2C.read(state.i2c, state.address, 6) do
-      {:ok, <<h2_raw::16, _crc, ethanol_raw::16, _crc2>>} ->
-        %{state | h2_raw: h2_raw, ethanol_raw: ethanol_raw}
-
+    with {:ok, <<h2_raw::16, h2_crc::8, ethanol_raw::16, ethanol_crc::8>>} <-
+           I2C.read(state.i2c, state.address, 6),
+         true <- CRC.check([{h2_raw, h2_crc}, {ethanol_raw, ethanol_crc}]) do
+      %{state | h2_raw: h2_raw, ethanol_raw: ethanol_raw}
+    else
       {:error, err} ->
-        log_it("raw measure error: #{inspect(err)}", :error)
+        log_it("measure error: #{inspect(err)}", :error)
         {:error, err, state}
+
+      false ->
+        log_it("CRC check failed", :error)
+        {:error, "CRC check failed", :error}
     end
   end
 
