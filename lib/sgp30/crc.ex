@@ -5,9 +5,7 @@ defmodule SGP30.CRC do
   end
 
   def check({data, crc}) do
-    data
-    |> calculate()
-    |> Kernel.==(crc)
+    calculate(data) == crc
   end
 
   def calculate(data) do
