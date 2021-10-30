@@ -1,6 +1,7 @@
 defmodule SGP30.CRC do
   def check(data_crc_tuples) when is_list(data_crc_tuples) do
-    Enum.all?(&check/1)
+    data_crc_tuples
+    |> Enum.all?(&check/1)
   end
 
   def check({data, crc}) do
