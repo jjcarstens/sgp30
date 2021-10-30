@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.1
+
+### Added
+
+- CRC's are now checked after reads
+
 ## 0.2.0
 
 * Breaking Changes
