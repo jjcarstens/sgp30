@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.2
+
+This update just allows `circuits_i2c ~> 1.0` and `telemetry ~> 1.0`
+but introduces no functional changes. (thanks @krns! :heart:)
+
 ## v0.2.1
 
 ### Added
