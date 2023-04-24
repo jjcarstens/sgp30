@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.3
+
+### Added
+
+- Allow I2C address to be set with `:address` option (Thanks @fhunleth!)
+
 ## v0.2.2
 
 This update just allows `circuits_i2c ~> 1.0` and `telemetry ~> 1.0`

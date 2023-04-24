@@ -1,7 +1,7 @@
 defmodule SGP30.MixProject do
   use Mix.Project
 
-  @version "0.2.2"
+  @version "0.2.3"
   @source_url "https://github.com/jjcarstens/sgp30"
 
   def project do
