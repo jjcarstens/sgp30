@@ -10,9 +10,12 @@ defmodule SGP30 do
   alias Circuits.I2C
   alias SGP30.CRC
 
+  @default_i2c_bus_name "i2c-1"
+  @default_i2c_address 0x58
+
   @polling_interval_ms 900
 
-  defstruct address: 0x58,
+  defstruct address: @default_i2c_address,
             serial: 0,
             tvoc_ppb: 0,
             co2_eq_ppm: 0,
@@ -37,9 +40,11 @@ defmodule SGP30 do
 
   @impl GenServer
   def init(opts) do
-    bus_name = opts[:bus_name] || "i2c-1"
+    bus_name = opts[:bus_name] || @default_i2c_bus_name
+    address = opts[:address] || @default_i2c_address
+
     {:ok, i2c} = I2C.open(bus_name)
-    {:ok, %__MODULE__{i2c: i2c}, {:continue, :serial}}
+    {:ok, %__MODULE__{i2c: i2c, address: address}, {:continue, :serial}}
   end
 
   @spec state(GenServer.server()) :: t()
