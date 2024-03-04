@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.4
+
+### Changed
+
+- Allow circuits_i2c 2.0 to be used (Thanks @fhunleth!)
+
 ## v0.2.3
 
 ### Added
